@@ -46,72 +46,69 @@ createComment(parent, { newComment }, { db: { users, posts, comments } }, info){
 
     return comment;
 },
-// refactor
-updateUser(parent, args, { db }, info) {
-  const { id, data } = args
-  const user = db.users.find((user) => user.id === id)
+
+updateUser(parent, { id, updateOptions }, { db: { users } }, info) {
+  const user = users.find((user) => user.id === id)
 
   if (!user) {
       throw new Error('User not found')
   }
 
-  if (typeof data.email === 'string') {
-      const emailTaken = db.users.some((user) => user.email === data.email)
+  if (typeof updateOptions.email === 'string') {
+      const emailTaken = users.some((user) => user.email === updateOptions.email)
 
       if (emailTaken) {
           throw new Error('Email taken')
       }
 
-      user.email = data.email
+      user.email = updateOptions.email
   }
 
-  if (typeof data.name === 'string') {
-      user.name = data.name
+  if (typeof updateOptions.name === 'string') {
+      user.name = updateOptions.name
   }
 
-  if (typeof data.age !== 'undefined') {
-      user.age = data.age
+  if (typeof updateOptions.age !== 'undefined') {
+      user.age = updateOptions.age
   }
 
   return user
 },
-// refactor
-updatePost(parent, args, { db }, info) {
-  const { id, data } = args
-  const post = db.posts.find((post) => post.id === id)
+
+updatePost(parent, { id, updateOptions }, { db: { posts } }, info) {
+  const post = posts.find((post) => post.id === id);
 
   if (!post) {
       throw new Error('Post not found')
   }
 
-  if (typeof data.title === 'string') {
-      post.title = data.title
+  if (typeof updateOptions.title === 'string') {
+      post.title = updateOptions.title
   }
 
-  if (typeof data.body === 'string') {
-      post.body = data.body
+  if (typeof updateOptions.body === 'string') {
+      post.body = updateOptions.body
   }
 
-  if (typeof data.published === 'boolean') {
-      post.published = data.published
+  if (typeof updateOptions.published === 'boolean') {
+      post.published = updateOptions.published
   }
 
-  return post
+  return post;
 },
-// refactor
-updateComment(parent, args, { db }, info) {
-  const { id, data } = args
-  const comment = db.comments.find((comment) => comment.id === id)
+
+updateComment(parent, { id, updateOptions }, { db: { comments } }, info) {
+  const comment = comments.find((comment) => comment.id === id);
 
   if (!comment) {
       throw new Error('Comment not found')
   }
 
-  if (typeof data.text === 'string') {
-      comment.text = data.text
+  if (typeof updateOptions.text === 'string') {
+      comment.text = updateOptions.text
   }
 
-  return comment
+  return comment;
 },
 
 deleteUser(parent, { id }, { db: { users, posts, comments } }, info) {
@@ -139,6 +136,7 @@ deleteUser(parent, { id }, { db: { users, posts, comments } }, info) {
 
   return deletedUsers[0]
 },
+
 deletePost(parent, { id }, { db: { posts, comments } }, info) {
   const postIndex = posts.findIndex(post => post.id === ID);
 
@@ -153,6 +151,7 @@ deletePost(parent, { id }, { db: { posts, comments } }, info) {
 
   return deletedPost[0];
 },
+
 deleteComment(parent, { id }, { db: { comments } }, info) {
   const commentIndex = comments.findIndex(post => post.id === ID);
 
