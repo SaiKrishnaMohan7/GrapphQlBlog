@@ -21,6 +21,10 @@ type Mutation {
   updateComment(id: ID!, updateOptions: UpdateCommentInput!): Comment!
 }
 
+type Subscription {
+  comment(postId: ID!): Comment!
+}
+
 input CreateUserInput {
   name: String!
   email: String!
@@ -31,13 +35,13 @@ input CreatePostInput {
   title: String!
   body: String!
   published: Boolean!
-  author: ID!
+  authorId: ID!
 }
 
 input CreateCommentInput {
   text: String!
-  author: ID!
-  post: ID!
+  authorId: ID!
+  postId: ID!
 }
 
 input UpdateUserInput {
@@ -77,7 +81,7 @@ type Post {
 type Comment {
   id: ID!
   text: String!
-  # data from db will have id in the author field, we use that to establish a relationship between Comment and User
+  # data from db will have id in the author (changed to authorId for clarity) field, we use that to establish a relationship between Comment and User
   author: User!
   post: Post!
 }

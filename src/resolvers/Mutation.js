@@ -1,4 +1,4 @@
-import casual from 'casual';
+import casual from 'casual'; // switch to uuid when this becpmes somethign
 
 const Mutation = {
   createUser(parent, { newUser }, { db: { users } }, info) {
@@ -14,14 +14,14 @@ const Mutation = {
     return user;
   },
   createPost(parent, { newPost }, { db: { users, posts } }, info) {
-    const userExists = users.some((user) => user.id === newPost.author)
+    const userExists = users.some((user) => user.id === newPost.authorId)
 
     if (!userExists) {
         throw new Error('User not found')
     }
 
     const post = {
-        id: uuidv4(),
+        id: casual.uuid,
         ...newPost
     };
 
@@ -29,20 +29,22 @@ const Mutation = {
 
     return post;
 },
-createComment(parent, { newComment }, { db: { users, posts, comments } }, info){
-    const userExists = users.some((user) => user.id === newComment.author)
-    const postExists = posts.some((post) => post.id === newComment.post && post.published)
+createComment(parent, { newComment }, { db: { users, posts, comments }, pubsub }, info){
+    const userExists = users.some((user) => user.id === newComment.authorId)
+    const postExists = posts.some((post) => post.id === newComment.postId && post.published)
 
     if (!userExists || !postExists) {
         throw new Error('Unable to find user and post')
     }
 
     const comment = {
-        id: uuidv4(),
+        id: casual.uuid,
         ...newComment,
     };
 
     comments.push(comment);
+
+    pubsub.publish(`comment-post-${newComment.postId}`, { comment });
 
     return comment;
 },
