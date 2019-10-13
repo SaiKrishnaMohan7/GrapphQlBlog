@@ -25,10 +25,16 @@ const Mutation = {
         ...newPost
     };
 
+    const subscriptionObject = {
+      operation: 'CREATE',
+      post,
+    }
+
     posts.push(post);
 
     if (newPost.published) {
-      pubsub.publish('post', { post });
+      // The object being sent here should have a property that matches with the subscription name
+      pubsub.publish('post', { post: subscriptionObject });
     }
 
     return post;

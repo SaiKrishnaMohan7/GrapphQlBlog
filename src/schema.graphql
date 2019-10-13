@@ -23,6 +23,12 @@ type Mutation {
 
 type Subscription {
   comment(postId: ID!): Comment!
+  post: PostPayloadSubscription!
+}
+
+type PostPayloadSubscription {
+  # Tell the UI why it is receiving this object
+  operation: String!
   post: Post!
 }
 
