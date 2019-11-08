@@ -23,7 +23,7 @@ type Mutation {
 
 type Subscription {
   comment(postId: ID!): Comment!
-  post: Post!
+  post: PostSubscriptionPayload!
 }
 
 input CreateUserInput {
@@ -85,4 +85,9 @@ type Comment {
   # data from db will have id in the author (changed to authorId for clarity) field, we use that to establish a relationship between Comment and User
   author: User!
   post: Post!
+}
+
+type PostSubscriptionPayload {
+  action: String!
+  payload: Post!
 }

@@ -3,6 +3,7 @@
 // hello is such a query and hence the resolver
 
 const Query = {
+	// parent, args, context, info
   users(parent, args, { db: { users }}, info) {
 	  if (!args.query) {
 		  return users
