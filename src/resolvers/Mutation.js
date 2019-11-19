@@ -25,6 +25,11 @@ const Mutation = {
         ...newPost
     };
 
+    const subscriptionObject = {
+      operation: 'CREATE',
+      post,
+    }
+
     posts.push(post);
 
     if (newPost.published) {
