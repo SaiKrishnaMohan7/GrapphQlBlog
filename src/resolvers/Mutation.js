@@ -33,8 +33,12 @@ const Mutation = {
     posts.push(post);
 
     if (newPost.published) {
-      // The object being sent here should have a property that matches with the subscription name
-      pubsub.publish('post', { post: subscriptionObject });
+      pubsub.publish('post', {
+        post: {
+          action: 'MUTATION',
+          payload: post,
+        }
+      });
     }
 
     return post;
@@ -87,24 +91,52 @@ updateUser(parent, { id, updateOptions }, { db: { users } }, info) {
   return user
 },
 
-updatePost(parent, { id, updateOptions }, { db: { posts } }, info) {
-  const post = posts.find((post) => post.id === id);
+updatePost(parent, { id, updateOptions }, { db: { posts }, pubsub }, info) {
+	const post = posts.find((post) => post.id === id);
+	const originalPost = { ...post };
 
   if (!post) {
       throw new Error('Post not found')
   }
 
   if (typeof updateOptions.title === 'string') {
-      post.title = updateOptions.title
+      post.title = updateOptions.title;
   }
 
   if (typeof updateOptions.body === 'string') {
-      post.body = updateOptions.body
+      post.body = updateOptions.body;
   }
 
   if (typeof updateOptions.published === 'boolean') {
-      post.published = updateOptions.published
-  }
+			post.published = updateOptions.published;
+
+			if (originalPost.published && !post.published) {
+				// post unpublished
+				pubsub.publish('post', {
+					post: {
+						action: 'DELETE',
+						payload: originalPost,
+					}
+				});
+			}
+
+			if (!originalPost.published && post.published) {
+				// post published
+				pubsub.publish('post', {
+					post: {
+						action: 'CREATED',
+						payload: originalPost,
+					},
+				});
+			}
+  } else if (post.published) {
+		pubsub.publish('post', {
+			post: {
+				action: 'UPDATED',
+				payload: post,
+			},
+		});
+	}
 
   return post;
 },
@@ -149,19 +181,29 @@ deleteUser(parent, { id }, { db: { users, posts, comments } }, info) {
   return deletedUsers[0]
 },
 
-deletePost(parent, { id }, { db: { posts, comments } }, info) {
-  const postIndex = posts.findIndex(post => post.id === ID);
+deletePost(parent, { id }, { db: { posts, comments }, pubsub }, info) {
+  const postIndex = posts.findIndex(post => post.id === id);
 
   if (postIndex === -1) {
     throw new Error('Post not found');
   }
 
   // Delete Post
-  const deletedPost = posts.splice(postIndex, 1);
+  const [deletedPost] = posts.splice(postIndex, 1);
   // Delete associated comments
   comments = comments.filter(comment => comment.post !== id);
 
-  return deletedPost[0];
+  // Inform Subscribers
+  if (deletedPost.published) {
+    pubsub.publish('post', {
+      post: {
+        action: 'DELETE',
+        payload: deletedPost,
+      }
+    });
+  }
+
+  return deletedPost;
 },
 
 deleteComment(parent, { id }, { db: { comments } }, info) {

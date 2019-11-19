@@ -29,7 +29,7 @@ type Subscription {
 type PostPayloadSubscription {
   # Tell the UI why it is receiving this object
   operation: String!
-  post: Post!
+  post: PostSubscriptionPayload!
 }
 
 input CreateUserInput {
@@ -91,4 +91,9 @@ type Comment {
   # data from db will have id in the author (changed to authorId for clarity) field, we use that to establish a relationship between Comment and User
   author: User!
   post: Post!
+}
+
+type PostSubscriptionPayload {
+  action: String!
+  payload: Post!
 }
